@@ -81,7 +81,7 @@ Finally, we set environment variables to access the CalDAV server:
  * `CAL_USR` - CalDAV username
  * `CAL_PWD` - CalDAV password
 
-These should go in `/etc/environment` to get loaded for the user.
+These should go in `/etc/environment` to be available system wide.
 Just add the following three lines to the bottom of that file.
 
     CAL_PWD=yourpassword
