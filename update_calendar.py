@@ -23,8 +23,8 @@ username = os.environ.get('CAL_USR')
 password = os.environ.get('CAL_PWD')
 
 # local files to store previous info
-schedule_file = "/home/ubuntu/einkcal/schedule"
-day_file = "/home/ubuntu/einkcal/day"
+schedule_file = "/home/pi/einkcal/schedule"
+day_file = "/home/pi/einkcal/day"
 
 # eink font setup
 fontdir = '/usr/share/fonts/truetype/dejavu'
