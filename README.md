@@ -1,6 +1,6 @@
 # einkcal
 
-A Python program to display calendar info on an eink display.
+A Python program to display calendar info on an eink display attached to a Raspberry Pi.
 
 I typically have a schedule for the current semester posted at my office door so that students who are looking for me can know when I might be available.
 Unfortunately, meetings get scheduled irregularly so my paper printout is often missing a lot of events.
@@ -9,21 +9,92 @@ That way students who are looking for me would see the most current info.
 
 # requirements
 
-This code was developed on a Raspberry Pi 3 Model B Rev 1.2 running Ubuntu 20.04 server.
-Attached to it is a [Waveshare 2.7 inch e-Paper HAT](https://smile.amazon.com/gp/product/B075FQKSZ9/).
+The following should work on a Raspberry Pi 3 running Debian Lite.
+It's untested on other configurations.
 
+I'm using a Waveshare 2.7inch 2-Paper HAT.
 It uses the `waveshare_epd` library to drive the display (and that library has its own dependencies).
+A github repo for the library is [here](https://github.com/waveshare/e-Paper).
+Details about software dependencies are [here](https://www.waveshare.com/wiki/2.7inch_e-Paper_HAT).
+Step-by-step instructions are below.
+
+You need to enable the SPI interface, e.g., through `raspi-config`.
+The HAT requires the BCM2835 libraries, which can be installed as follows:
+
+    wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.60.tar.gz
+    tar zxvf bcm2835-1.60.tar.gz 
+    cd bcm2835-1.60/
+    sudo ./configure
+    sudo make
+    sudo make check
+    sudo make install
+
+Install WiringPi:
+
+    sudo apt-get install wiringpi
+
+And install the required python3 libraries:
+
+    sudo apt-get update
+    sudo apt-get install python3-pip
+    sudo apt-get install python3-pil
+    sudo apt-get install python3-numpy
+    sudo pip3 install RPi.GPIO
+    sudo pip3 install spidev
+
+Once those are done, you can download the Waveshare e-Paper library and install it.
+
+    git clone https://github.com/waveshare/e-Paper
+    cd e-Paper/RaspberryPi\&JetsonNano/python/
+    sudo python3 setup.py install
+
+And test the install with the provided demo code (below is for the 2.7 inch B&W display):
+
+    cd examples
+    sudo python3 epd_2in7_test.py
+
+For my code to use it as a calendar display, clone the repo in your home directory.
+
+    cd ~
+    git clone https://github.com/wck0/einkcal.git
+
+It requires the `caldav`, `icalendar`, and `pytz` python libraries.
+
+    sudo pip3 install caldav
+    sudo pip3 install icalendar
+
+You should end up with `pytz` as well when installing icalendar.
+
 The `caldav` library connects to a CalDAV server, and the response is parsed with the `icalendar` library.
+`caldav` relies on libsxlt-dev`
 
-For some reason, I was having difficulty setting everything up in a `venv` so `requirements.txt` reflects the system-wide result of `pip3 freeze`.
+    sudo apt-get install libxslt-dev
+    
+Also, we are using some fonts to render the text.
+Raspbian Lite doesn't have them by default, so we get them:
 
-Environment variables need to be set to access the CalDAV server:
+    sudo apt-get install fontconfig-config
+
+Finally, we set environment variables to access the CalDAV server:
 
  * `CAL_URL` - URL to CalDAV server
  * `CAL_USR` - CalDAV username
  * `CAL_PWD` - CalDAV password
 
-On the Raspberry Pi, these should be set in `/etc/environment` since the script needs to run as root.
+These should go in `~/.bashrc` to get loaded for the user.
+Just add the following three lines to the bottom of that file.
+
+    export CAL_PWD=yourpassword
+    export CAL_USR=yourusername
+    export CAL_URL=https://example.com/path/to/caldav/calendar
+
+# usage
+
+Run the following to update the display:
+
+    sudo -E python3 update_calendar.py
+    
+Using the `-E` flag with `sudo` allows the root user to use the environment variables set above.
 
 # features
 
@@ -33,9 +104,11 @@ The display only updates if there is a change to the information that needs to b
 That includes the date and the calendar events.
 Information is logged if enabled.
 
-A cronjob can run to check for updates every five minutes (for example) by adding the following to your crontab:
+A cronjob can run to check for updates every five minutes (for example) by adding the following to your crontab (run `crontab -e` to edit your crontab and put the line at the bottom):
 
-    */5 * * * * sudo python3 /path/to/update_calendar.py 2>&1 | /usr/bin/logger -t einkCal
+    */5 * * * * sudo -E python3 /path/to/update_calendar.py 2>&1 | /usr/bin/logger -t einkCal
+
+That will log any messages to `/var/log/syslog`.
 
 You can also just run the script manually if you want to force a check for changes.
 (But I haven't made any effort to ensure that a manual update doesn't conflict with the scheduled one or vice versa, so user beware.)
