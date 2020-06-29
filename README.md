@@ -81,12 +81,12 @@ Finally, we set environment variables to access the CalDAV server:
  * `CAL_USR` - CalDAV username
  * `CAL_PWD` - CalDAV password
 
-These should go in `~/.bashrc` to get loaded for the user.
+These should go in `/etc/environment` to get loaded for the user.
 Just add the following three lines to the bottom of that file.
 
-    export CAL_PWD=yourpassword
-    export CAL_USR=yourusername
-    export CAL_URL=https://example.com/path/to/caldav/calendar
+    CAL_PWD=yourpassword
+    CAL_USR=yourusername
+    CAL_URL=https://example.com/path/to/caldav/calendar
 
 # usage
 
@@ -119,3 +119,7 @@ I plan to have this display on a larger eink display (maybe 7.5in?), maybe a thr
 It would be nice to make that configurable, too, by the user.
 
 It would be cool to also have the calendar visible on a webpage served by the same Raspberry Pi.
+
+And right now, a couple of files are used to keep track of the date and the events.
+It might be better to put those in a JSON file, along with the caldav credentials.
+That would bipass the need for setting environment variables and make it all a little easier to manage.
