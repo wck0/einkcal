@@ -7,7 +7,7 @@ import os
 import logging
 from waveshare_epd import epd2in7
 import time
-from PIL import Image,ImageDraw,ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import traceback
 import caldav
 from datetime import datetime, timedelta
@@ -52,7 +52,7 @@ for calendar in principal.calendars():
         break
 
 # get today's events
-today = datetime.today() # - timedelta(days=4)
+today = datetime.today()
 after = today - timedelta(days=2)
 before = today + timedelta(days=2)
 
@@ -103,21 +103,21 @@ except FileNotFoundError:
 if update_needed:
     try:
         logging.info("eink Calendar prototype")
-        
+
         epd = epd2in7.EPD()
-        
+
         '''2Gray(Black and white) display'''
         logging.info("init and Clear")
         epd.init()
         epd.Clear(0xFF)
-        
-        image = Image.new('1', (epd.height, epd.width), 255)  # 255: clear the frame
+
+        image = Image.new('1', (epd.height, epd.width), 255)
         draw = ImageDraw.Draw(image)
         head = today.astimezone(LOS_ANGELES).strftime("%A %x")
         logging.info("Write header")
-        draw.text((1,1), head, font=HEAD_FONT, fill=0)
+        draw.text((1, 1), head, font=HEAD_FONT, fill=0)
         logging.info("Write schedule")
-        draw.text((1,1+HEAD_FONT_SIZE), msg, font=EVENT_FONT, fill=0)
+        draw.text((1, 1 + HEAD_FONT_SIZE), msg, font=EVENT_FONT, fill=0)
 
         epd.display(epd.getbuffer(image))
         logging.info("Put e-paper to sleep.")
@@ -128,11 +128,11 @@ if update_needed:
         with open(day_file, 'w') as f:
             f.write(daystr)
             logging.info("Writing day to file")
-        
+
     except IOError as e:
         logging.info(e)
-        
-    except KeyboardInterrupt:    
+
+    except KeyboardInterrupt:
         logging.info("ctrl + c:")
         epd2in7.epdconfig.module_exit()
         exit()
